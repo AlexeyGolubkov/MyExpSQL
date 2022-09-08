@@ -1,0 +1,32 @@
+sqlite> select streams.number, courses.theme, streams.started_at FROM streams INNER JOIN courses;
+number  theme                   started_at
+------  ----------------------  ----------
+165     Базы данных             2020-08-18
+165     Основы Python           2020-08-18
+165     Linux. Рабочая станция  2020-08-18
+178     Базы данных             2020-10-02
+178     Основы Python           2020-10-02
+178     Linux. Рабочая станция  2020-10-02
+203     Базы данных             2020-11-12
+203     Основы Python           2020-11-12
+203     Linux. Рабочая станция  2020-11-12
+210     Базы данных             2020-12-03
+210     Основы Python           2020-12-03
+210     Linux. Рабочая станция  2020-12-03
+sqlite>
+sqlite> select courses.theme, sum(streams.students_amount) AS total_students FROM courses INNER JOIN streams ON streams.course_id=courses.id GROUP BY courses.theme ORDER BY courses.id DESC;
+theme                   total_students
+----------------------  --------------
+Linux. Рабочая станция  34
+Основы Python           37
+Базы данных             76
+sqlite>
+
+sqlite> select teachers.id,teachers.surname,teachers.name, avg(grades.performance) from teachers left join grades on teachers.id=grades.teacher_id GROUP BY teachers.id;
+id  surname   name     avg(grades.performance)
+--  --------  -------  -----------------------
+1   Савельев  Николай  4.85
+2   Петрова   Наталья  4.9
+3   Малышева  Елена    4.7
+4   Новый     Учитель
+sqlite>

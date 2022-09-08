@@ -1,0 +1,33 @@
+sqlite> select distinct courses.theme, sum(streams.students_amount) over (partition by courses.theme ) as student_peaple from streams left join courses on courses.id=streams.course_id;
+theme|student_peaple
+Linux. Рабочая станция|34
+Базы данных|76
+Основы Python|37
+sqlite>
+sqlite> select distinct teachers.id, teachers.surname,teachers.name, avg(grades.performance) over (partition by teachers.id) from teachers left join grades on teachers.id=grades.teacher_id left join streams on grades.streams_id=streams.id;
+id|surname|name|avg(grades.performance) over (partition by teachers.id)
+1|Савельев|Николай|4.85
+2|Петрова|Наталья|4.9
+4|Новый|Учитель|
+sqlite>
+sqlite>
+ Какие индексы надо создать для максимально быстрого выполнения представленного запроса?
+SELECT
+surname,
+name,
+number,
+performance
+FROM academic_performance
+JOIN teachers
+ON academic_performance.teacher_id = teachers.id
+JOIN streams
+ON academic_performance.stream_id = streams.id
+WHERE number >= 200;
+Ответ: academic_performance.teacher_id, academic_performance.stream_id(учитывая что teachers.id и streams.id уже индексированы, а academic_performance.number - integer)
+
+sqlite> select distinct teachers.id , teachers.surname, teachers.name,courses.theme, min(grades.performance) over (partition by courses.theme) as min ,max(grades.performance) over (partition by courses.theme) as max from teachers left join grades on teachers.id=grades.teacher_id  left join streams on streams.id=grades.streams_id left join courses on courses.id=streams.course_id order by teachers.id;
+id|surname|name|theme|min|max
+1|Савельев|Николай|Базы данных|4.8|4.9
+2|Петрова|Наталья|Основы Python|4.9|4.9
+4|Новый|Учитель|||
+sqlite>

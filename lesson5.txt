@@ -1,0 +1,94 @@
+1)потоки, количество учеников в которых больше или равно 40. В отчет выведены: номер потока, название курса и количество учеников
+
+SELECT number, 
+(SELECT theme FROM courses WHERE id=
+(SELECT course_id FROM streams)) AS name_course,
+students_amount FROM streams GROUP BY students_amount HAVING students_amount>=40;
+
+number  name_course             students_amount
+------  ----------------------  ---------------
+210     Linux. Рабочая станция  41
+
+2)два потока с самыми низкими значениями успеваемости. В отчет выведены: номер потока, название курса, фамилию и имя преподавателя (одним столбцом), оценку успеваемости.
+
+
+то что просто достать из таблицы grades:
+
+SELECT 
+(SELECT number  FROM streams WHERE id=grades.streams_id) AS number_streams, 
+'course_name', 
+(SELECT name ||" "||" "|| surname  FROM teachers WHERE id=grades.teacher_id) AS name_surname_teacher,
+ performance  FROM grades ORDER BY performance ASC LIMIT 2;
+
+теперь достаем courses(id)
+
+sqlite> SELECT
+(SELECT number   FROM streams WHERE id=grades.streams_id) AS number_streams,
+(select course_id from streams where number=(SELECT number   FROM streams WHERE id=grades.streams_id)) AS course_id,
+(SELECT name ||" "||" "|| surname   FROM teachers WHERE id=grades.teacher_id) AS name_surname_teacher,
+performance  FROM grades ORDER BY performance ASC LIMIT 2;
+
+165|3|Елена  Малышева|4.7
+203|1|Николай  Савельев|4.8
+
+
+делаем скрипт запрос в таблицу курсов со значением id=3:
+SELECT 
+(SELECT number  FROM streams WHERE id=grades.streams_id) AS number_streams , 
+(SELECT theme FROM courses WHERE id=3)  AS course_name ,
+(SELECT name ||" "||" "|| surname   FROM teachers WHERE id=grades.teacher_id) AS name_surname_teacher,
+ performance  FROM grades ORDER BY performance ASC LIMIT 2;
+
+и меняем 3 на запрос выводящий course_id, получаем ответ:
+
+SELECT 
+(SELECT number FROM streams WHERE id=grades.streams_id) AS number_streams, 
+(SELECT theme FROM courses WHERE id= (select course_id from streams where number=(SELECT number  AS number_streams FROM streams WHERE id=grades.streams_id)) ) AS course_name,
+(SELECT name ||" "||" "|| surname  FROM teachers WHERE id=grades.teacher_id) AS name_surname_teacher,
+ performance  FROM grades ORDER BY performance ASC LIMIT 2;
+number_streams|course_name|name_surname_teacher|performance
+165|Linux. Рабочая станция|Елена  Малышева|4.7
+203|Базы данных|Николай  Савельев|4.8
+sqlite>
+
+3)средняя успеваемость всех потоков преподавателя Николая Савельева. В отчёте выведены идентификатор преподавателя и среднюю оценку по потокам.
+
+sqlite> SELECT AVG (performance), teacher_id FROM grades WHERE teacher_id=
+   ...> (SELECT id FROM teachers WHERE name="Николай" AND surname="Савельев");
+AVG (performance)|teacher_id
+4.85|1
+sqlite>
+
+4)потоки преподавателя Натальи Петровой, а также потоки, по которым успеваемость ниже 4.8. В отчёт выведите идентификатор потока, фамилию и имя преподавателя.
+SELECT streams_id, 
+"Наталья Петрова" AS name_surname_teacher
+  FROM grades WHERE teacher_id=
+(SELECT id FROM teachers WHERE name="Наталья" AND surname="Петрова")
+UNION ALL
+SELECT streams_id, 
+(SELECT name ||" "||" "|| surname AS name_surname_teacher FROM teachers WHERE id=grades.teacher_id ) FROM grades WHERE performance<4.8;
+
+streams_id|name_surname_teacher
+2.0|Наталья Петрова
+1.0|Елена  Малышева
+sqlite>
+
+5)разница между средней успеваемостью преподавателя с наивысшим соответствующим значением и средней успеваемостью преподавателя с наименьшим значением. Средняя успеваемость считается по всем потокам преподавателя.
+
+sqlite> select * FROM grades GROUP BY performance ORDER BY AVG(performance) ASC limit 1;
+teacher_id|streams_id|performance
+3|1.0|4.7
+sqlite> select * FROM grades GROUP BY performance ORDER BY AVG(performance) DESC limit 1;
+teacher_id|streams_id|performance
+2|2.0|4.9
+sqlite>
+select AVG(performance) FROM grades where teacher_id=(select teacher_id FROM grades GROUP BY performance ORDER BY AVG(performance) DESC limit 1);
+AVG(performance)
+4.9
+select AVG(performance) FROM grades where teacher_id=(select teacher_id FROM grades GROUP BY performance ORDER BY AVG(performance) ASC limit 1);
+AVG(performance)
+4.7
+sqlite> select (select AVG(performance) FROM grades where teacher_id=(select teacher_id FROM grades GROUP BY performance ORDER BY AVG(performance) DESC limit 1))-(select AVG(performance) FROM grades where teacher_id=(select teacher_id FROM grades GROUP BY performance ORDER BY AVG(performance) ASC limit 1));
+(select AVG(performance) FROM grades where teacher_id=(select teacher_id FROM grades GROUP BY performance ORDER BY AVG(performance) DESC limit 1))-(select AVG(performance) FROM grades where teacher_id=(select teacher_id FROM grades GROUP BY performance ORDER BY AVG(performance) ASC limit 1))
+0.2
+sqlite>

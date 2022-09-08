@@ -1,0 +1,301 @@
+SQLite version 3.37.0 2021-11-27 14:13:22
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+sqlite> .open teachers.db
+sqlite> .tables
+achievements  courses       streams       teachers
+sqlite> .schema
+CREATE TABLE teachers (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL,
+surname TEXT NOT NULL,
+email TEXT NOT NULL UNIQUE
+);
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE courses (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+theme TEXT NOT NULL
+);
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+begin_date TEXT NOT NULL,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+CREATE TABLE achievements (
+teacher_id INTEGER NOT NULL,
+streams_id INTEGER NOT NULL,
+ageresult REAL NOT NULL,
+PRIMARY KEY (teacher_id,streams_id),
+FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+FOREIGN KEY (streams_id) REFERENCES streams(id)
+);
+sqlite> ALTER TABLE streams RENAME COLUMN begin_date TO start_at
+   ...> ;
+sqlite> .schema streams
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+start_at TEXT NOT NULL,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+sqlite> ALTER TABLE streams ADD COLUMN finished_at;
+sqlite> .schema streams
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+start_at TEXT NOT NULL, finished_at,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+sqlite> ALTER TABLE streams ADD COLUMN finished_at TEXT;
+Error: in prepare, duplicate column name: finished_at (1)
+sqlite> ALTER TABLE streams DELETE COLUMN finished_at;
+Error: in prepare, near "DELETE": syntax error (1)
+sqlite> ALTER TABLE /?
+   ...> ;
+Error: in prepare, near "/": syntax error (1)
+sqlite> .help ALTER TABLE
+.recover                 Recover as much data as possible from corrupt db.
+   --freelist-corrupt       Assume the freelist is corrupt
+   --recovery-db NAME       Store recovery metadata in database file NAME
+   --lost-and-found TABLE   Alternative name for the lost-and-found table
+   --no-rowids              Do not attempt to recover rowid values
+                            that are not also INTEGER PRIMARY KEYs
+sqlite> DROP TABLE streams COLUMN finished_at;
+Error: in prepare, near "COLUMN": syntax error (1)
+sqlite> DROP TABLE streams;
+sqlite> CREATE TABLE streams(
+   ...> id INTEGER PRIMARY KEY AUTOINCREMENT,
+   ...> course_id INTEGER NOT NULL,
+   ...> number TEXT NOT NULL,
+   ...> begin_date TEXT NOT NULL,
+   ...> FOREIGN KEY (course_id) REFERENCES courses(id)
+   ...> );
+sqlite> ALTER TABLE streams ADD COLUMN finished_at TEXT;
+sqlite> .schema
+CREATE TABLE teachers (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL,
+surname TEXT NOT NULL,
+email TEXT NOT NULL UNIQUE
+);
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE courses (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+theme TEXT NOT NULL
+);
+CREATE TABLE achievements (
+teacher_id INTEGER NOT NULL,
+streams_id INTEGER NOT NULL,
+ageresult REAL NOT NULL,
+PRIMARY KEY (teacher_id,streams_id),
+FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+FOREIGN KEY (streams_id) REFERENCES streams(id)
+);
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+begin_date TEXT NOT NULL, finished_at TEXT,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+sqlite> INSERT INTO teachers VALUES ('Николай','Савельев','saveliev.n@mai.ru');
+Error: in prepare, table teachers has 4 columns but 3 values were supplied (1)
+sqlite> INSERT INTO teachers VALUES (1,'Николай','Савельев','saveliev.n@mai.ru');
+sqlite> INSERT INTO teachers VALUES (2,'Наталья','Петрова','petrova.n@yandex.ru');
+sqlite> INSERT INTO teachers VALUES (3,'Елена','Малышева','malisheva.e@google.com');
+sqlite> SELECT * FROM teachers;
+1|Николай|Савельев|saveliev.n@mai.ru
+2|Наталья|Петрова|petrova.n@yandex.ru
+3|Елена|Малышева|malisheva.e@google.com
+sqlite> INSERT INTO courses VALUES(1,'Базы данных')
+sqlite> INSERT INTO courses VALUES(2,'Основы Python');
+sqlite> INSERT INTO courses VALUES(3,'Linux. Рабочая станция');
+sqlite> .schema streams
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+begin_date TEXT NOT NULL, finished_at TEXT,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+sqlite>
+sqlite> DROP TABLE streams;
+sqlite> CREATE TABLE streams(
+   ...> id INTEGER PRIMARY KEY AUTOINCREMENT,
+   ...> course_id INTEGER NOT NULL,
+   ...> number TEXT NOT NULL,
+   ...> begin_date TEXT NOT NULL,
+   ...> FOREIGN KEY (course_id) REFERENCES courses(id)
+   ...> );
+sqlite> ALTER TABLE streams RENAME COLUMN begin_date to started_at;
+sqlite> .schema streams
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+started_at TEXT NOT NULL,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+sqlite> ALTER TABLE streams ADD COLUMN students_amount INTEGER NOT NULL;
+sqlite> .schema streams
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+started_at TEXT NOT NULL, students_amount INTEGER NOT NULL,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+sqlite> INSERT INTO streams VALUES (1,3,'165','18.08.2020',34);
+sqlite> INSERT INTO streams VALUES (2,2,'178','02.10.2020',37);
+sqlite> INSERT INTO streams VALUES (3,1,'203','12.11.2020',35);
+sqlite> INSERT INTO streams VALUES (4,1,'210','03.12.2020',41);
+sqlite> SELECT * FROM streams
+   ...> ;
+1|3|165|18.08.2020|34
+2|2|178|02.10.2020|37
+3|1|203|12.11.2020|35
+4|1|210|03.12.2020|41
+sqlite> .tables
+achievements  courses       streams       teachers
+sqlite> .schema achievements
+CREATE TABLE achievements (
+teacher_id INTEGER NOT NULL,
+streams_id INTEGER NOT NULL,
+ageresult REAL NOT NULL,
+PRIMARY KEY (teacher_id,streams_id),
+FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+FOREIGN KEY (streams_id) REFERENCES streams(id)
+);
+sqlite> ALTER TABLE achievements RENAME TO grades;
+sqlite> .tables
+courses   grades    streams   teachers
+sqlite> INSERT INTO grades VALUES (3,1,4.7);
+sqlite> INSERT INTO grades VALUES (2,2,4.9);
+sqlite> INSERT INTO grades VALUES (1,3,4.8);
+sqlite> INSERT INTO grades VALUES (1,4,4.9);
+sqlite> SELECT * FROM grades;
+3|1|4.7
+2|2|4.9
+1|3|4.8
+1|4|4.9
+sqlite> .schema grades
+CREATE TABLE IF NOT EXISTS "grades" (
+teacher_id INTEGER NOT NULL,
+streams_id INTEGER NOT NULL,
+ageresult REAL NOT NULL,
+PRIMARY KEY (teacher_id,streams_id),
+FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+FOREIGN KEY (streams_id) REFERENCES streams(id)
+);
+sqlite> ALTER TABLE grades RENAME COLUMN ageresult TO performance;
+sqlite> .schema grades
+CREATE TABLE IF NOT EXISTS "grades" (
+teacher_id INTEGER NOT NULL,
+streams_id INTEGER NOT NULL,
+performance REAL NOT NULL,
+PRIMARY KEY (teacher_id,streams_id),
+FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+FOREIGN KEY (streams_id) REFERENCES streams(id)
+);
+sqlite> CREATE TABLE IF NOT EXISTS "grades_n" (
+   ...> teacher_id INTEGER NOT NULL,
+   ...> streams_id REAL NOT NULL,
+   ...> performance REAL NOT NULL,
+   ...> PRIMARY KEY (teacher_id,streams_id),
+   ...> FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+   ...> FOREIGN KEY (streams_id) REFERENCES streams(id)
+   ...> );
+sqlite> .tables
+courses   grades    grades_n  streams   teachers
+sqlite> .mode line
+sqlite> .mode insert
+sqlite> SELECT * FROM grades
+   ...> ;
+INSERT INTO "table" VALUES(3,1,4.7000000000000001776);
+INSERT INTO "table" VALUES(2,2,4.9000000000000003552);
+INSERT INTO "table" VALUES(1,3,4.7999999999999998223);
+INSERT INTO "table" VALUES(1,4,4.9000000000000003552);
+sqlite> INSERT INTO grades_n VALUES(3,1,4.7000000000000001776);
+sqlite> INSERT INTO grades_n VALUES(2,2,4.9000000000000003552);
+sqlite> INSERT INTO grades_n VALUES(1,3,4.7999999999999998223);
+sqlite> INSERT INTO grades_n VALUES(1,4,4.9000000000000003552);
+sqlite> SELECT * FROM grades
+   ...> ;
+INSERT INTO "table" VALUES(3,1,4.7000000000000001776);
+INSERT INTO "table" VALUES(2,2,4.9000000000000003552);
+INSERT INTO "table" VALUES(1,3,4.7999999999999998223);
+INSERT INTO "table" VALUES(1,4,4.9000000000000003552);
+sqlite> .mode line
+sqlite> SELECT * FROM grades;
+ teacher_id = 3
+ streams_id = 1
+performance = 4.7
+
+ teacher_id = 2
+ streams_id = 2
+performance = 4.9
+
+ teacher_id = 1
+ streams_id = 3
+performance = 4.8
+
+ teacher_id = 1
+ streams_id = 4
+performance = 4.9
+sqlite> SELECT * FROM grades_n;
+ teacher_id = 3
+ streams_id = 1.0
+performance = 4.7
+
+ teacher_id = 2
+ streams_id = 2.0
+performance = 4.9
+
+ teacher_id = 1
+ streams_id = 3.0
+performance = 4.8
+
+ teacher_id = 1
+ streams_id = 4.0
+performance = 4.9
+sqlite> DELETE FROM grades;
+sqlite> .tables
+courses   grades    grades_n  streams   teachers
+sqlite> DROP TABLE grades
+   ...> ;
+sqlite> .tables
+courses   grades_n  streams   teachers
+sqlite> ALTER TABLE grades_n RENAME TO grades;
+sqlite> .schema
+CREATE TABLE teachers (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL,
+surname TEXT NOT NULL,
+email TEXT NOT NULL UNIQUE
+);
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE courses (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+theme TEXT NOT NULL
+);
+CREATE TABLE streams(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+course_id INTEGER NOT NULL,
+number TEXT NOT NULL,
+started_at TEXT NOT NULL, students_amount INTEGER NOT NULL,
+FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+CREATE TABLE IF NOT EXISTS "grades" (
+teacher_id INTEGER NOT NULL,
+streams_id REAL NOT NULL,
+performance REAL NOT NULL,
+PRIMARY KEY (teacher_id,streams_id),
+FOREIGN KEY (teacher_id) REFERENCES teachers(iD),
+FOREIGN KEY (streams_id) REFERENCES streams(id)
+);
+sqlite>
